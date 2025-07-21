@@ -270,11 +270,17 @@
                             <tbody>
                                 @foreach ($tasks as $task)
                                 <tr>
-                                    <td>
-                            <div class="book-cover">
-                                 <img src="{{ asset('storage/covers/' . $task->cover_image) }}">
-                            </div>
-                                    </td>
+                            <td>
+                               <div class="book-cover">
+                                @if ($task->coverImage)
+                                   <img src="{{ asset('storage/covers/' . $task->coverImage->image_path) }}" alt="Cover">
+                                @else
+                                   <div class="no-cover">
+                                   <i class="fas fa-image"></i>
+                                </div>
+                                @endif
+                                </div>
+                            </td>
 
                                     <td>
                                         <strong>{{ $task->book_title }}</strong><br>

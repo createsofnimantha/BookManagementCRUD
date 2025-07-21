@@ -31,7 +31,7 @@ return new class extends Migration
         
         // Additional information
         $table->text('description')->nullable();
-        $table->string('cover_image')->nullable(); // file path
+
         
         // Timestamps
         $table->timestamps();

@@ -137,7 +137,7 @@
                                         </label>
                                         <input type="text" class="form-control" id="author" name="author" required>
                                     </div>
-                                                                       <div class="col-md-4">
+                                    <div class="col-md-4">
                                         <label for="publicationYear" class="form-label">
                                             <i class="fas fa-calendar-alt text-primary me-2"></i>Publication Year
                                         </label>

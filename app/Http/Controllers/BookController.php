@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\BookCoverImage;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
@@ -32,19 +33,24 @@ class BookController extends Controller
      */
 public function store(Request $request)
 {
-    $data = $request->all();
+    $data = $request->except('cover_image');
+
+    // Create the book first
+    $book = $this->task->create($data);
 
     // Check if file is uploaded
     if ($request->hasFile('cover_image')) {
         $file = $request->file('cover_image');
         $filename = time() . '.' . $file->getClientOriginalExtension();
         $file->storeAs('public/covers', $filename);
-        $data['cover_image'] = $filename;
+
+        // Save cover image in separate table
+        $book->coverImage()->create([
+            'image_path' => $filename
+        ]);
     }
 
-    $this->task->create($data);
-
-    return redirect()->route('index');
+    return redirect()->route('index')->with('success', 'Book added!');
 }
 
     /**
@@ -71,27 +77,45 @@ public function edit($id)
 public function update(Request $request, $id)
 {
     $task = Book::findOrFail($id);
-    $data = $request->all();
+    $data = $request->except('cover_image');
 
+    $task->update($data);
+
+    // Update or create cover image
     if ($request->hasFile('cover_image')) {
         $file = $request->file('cover_image');
         $filename = time() . '.' . $file->getClientOriginalExtension();
         $file->storeAs('public/covers', $filename);
-        $data['cover_image'] = $filename;
-    }
 
-    $task->update($data);
+        if ($task->coverImage) {
+            $task->coverImage->update([
+                'image_path' => $filename
+            ]);
+        } else {
+            $task->coverImage()->create([
+                'image_path' => $filename
+            ]);
+        }
+    }
 
     return redirect()->route('index')->with('success', 'Book updated!');
 }
 
+
     /**
      * Remove the specified resource from storage.
      */
-    public function delete($id)
-    {
-        $task=$this->task->find($id);
-        $task->delete();
-        return redirect()->back();
+public function delete($id)
+{
+    $task = $this->task->find($id);
+
+    // delete related cover image
+    if ($task->coverImage) {
+        $task->coverImage->delete();
     }
+
+    $task->delete();
+    return redirect()->back()->with('success', 'Book deleted!');
+}
+
 }
